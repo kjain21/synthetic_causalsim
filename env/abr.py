@@ -44,7 +44,7 @@ class ABRSimEnv(object):
         https://dl.acm.org/citation.cfm?id=2787486
     """
 
-    def __init__(self, test_mode=False):
+    def __init__(self):
         # observation and action space
         self.trace_idx = None
         self.rtt = None
