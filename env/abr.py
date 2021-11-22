@@ -116,7 +116,7 @@ class ABRSimEnv(object):
                 obs_arr[i] = self.obs_high[i]
 
         obs_arr = np.array(obs_arr)
-        assert self.observation_space.contains(obs_arr)
+        assert self.observation_space.contains(obs_arr), f"The violating observation is {obs_arr}"
 
         return obs_arr[:2 * config.mpc_lookback + 3 + 6], obs_arr
 
