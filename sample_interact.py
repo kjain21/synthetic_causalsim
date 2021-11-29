@@ -35,8 +35,8 @@ def run_trajectories():
             next_obs, rew, done, info = env.step(act)
 
             # Print some statistics
-            print(f'At chunk {t}, the agent took action {act}, and got a reward {rew}')
-            print(f'\t\tThe observation was {obs}')
+            # print(f'At chunk {t}, the agent took action {act}, and got a reward {rew}')
+            # print(f'\t\tThe observation was {obs}')
 
             # Going forward: the next state at point t becomes the current state at point t+1
             obs = next_obs

@@ -307,7 +307,7 @@ class PensieveAgent(Agent):
         print(type(self.obs_len))
 
         self.policy_net = torch.jit.script(PensNet(self.obs_len, self.act_n, [32, 16]))
-        policies = torch.load('models/pensieve2/model_749')
+        policies = torch.load('models/synthetic_test/model_749')
         self.policy_net.load_state_dict(policies[0])
 
     def take_action(self, obs_np):

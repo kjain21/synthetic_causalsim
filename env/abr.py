@@ -180,7 +180,9 @@ class ABRSimEnv(object):
         next_buffer_white = next_buffer_white_tensor.cpu().numpy()
         down_time_white = down_time_white_tensor.cpu().numpy()
         download_time = (down_time_white * self.download_time_std) + self.download_time_mean
+        download_time = max(download_time, chunk_size/99e6)
         next_buffer = (next_buffer_white * self.next_buffer_std) + self.next_buffer_mean
+        next_buffer = max(min(next_buffer, 99.9), 0)
         self.curr_t_idx += 1
         if self.curr_t_idx >= 489:
             self.curr_t_idx = 0
