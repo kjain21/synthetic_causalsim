@@ -49,8 +49,9 @@ def create_normer():
 
 class Normer(object):
     def __init__(self):
-        with open('pensieve/normer1.pkl', 'rb') as fandle:
-            self.transformer = pickle.load(fandle)
+        # with open('pensieve/normer_param_update.pkl', 'rb') as fandle:
+        #     self.transformer = pickle.load(fandle)
+        pass
     
     def __call__(self, data):
         return self._normit(data)
@@ -61,10 +62,21 @@ class Normer(object):
             data = data.reshape(1, -1)
         else:
             resqueeze = False
-        out = self.transformer.transform(data)
+
+        # out = self.transformer.transform(data)
+
+        assert data.shape[1] == 19
+        out = np.array(data)
+        out[:, :5] = data[:, :5] * 8 / 1e6
+        out[:, 10] = data[:, 10] / 40 * 2 - 1
+        out[:, 11] = data[:, 11] / 490 * 2 - 1
+        out[:, 12] = data[:, 12] / 3 - 1
+        out[:, 13:19] = data[:, 13:19] * 8 / 1e6
+
         if resqueeze:
             out = out[0]
         return out
 
 if __name__ == '__main__':
-    create_normer()
+    # create_normer()
+    normer = Normer()

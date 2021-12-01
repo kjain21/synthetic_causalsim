@@ -10,7 +10,7 @@ import torch
 import os
 import numpy as np
 import time
-from tqdm.notebook import trange, tqdm
+from tqdm import trange, tqdm
 from param import config
 from env.model import *
 
@@ -28,9 +28,9 @@ def train_pensieve(gamma, ent_max, ent_decay, name):
 
     # A set of hyperparameters
     # DO NOT CHANGE
-    LR = 1e-2                       #  Learning rate
+    LR = 1e-3                       #  Learning rate
     WD = 1e-4                       #  Weight decay (or in other words, L2 regularization penalty)
-    NUM_EPOCHS = 750                #  How many epochs to train
+    NUM_EPOCHS = 8000                #  How many epochs to train
     EPOCH_SAVE = 100                #  How many epochs till we save the model
     ENT_MAX = ent_max               #  Initial value for entropy
     ENT_DECAY = ent_decay           #  Entropy decay rate
@@ -97,7 +97,7 @@ def train_pensieve(gamma, ent_max, ent_decay, name):
             # print(rew)
 
             # Save our interactions in the buffer
-            buff.add_exp(obs, act, rew, next_obs, done, info['stall_time'])
+            buff.add_exp(normer(obs), act, rew, normer(next_obs), done, info['stall_time'])
 
             obs = next_obs
 
@@ -110,8 +110,8 @@ def train_pensieve(gamma, ent_max, ent_decay, name):
 
         # Train A2C with GAE and entropy regularizer, the names sound scary but they are simpler than you think
         pg_loss, v_loss, real_entropy, ret_np, v_np, adv_np = train_actor_critic(value_net, policy_net, net_opt_p, net_opt_v, net_loss, torch.device('cpu'), 
-                                                                                 all_actions_np, normer(all_next_states), all_rewards / REW_SCALE, 
-                                                                                 normer(all_states), all_dones, entropy_factor, GAMMA, LAMBDA)
+                                                                                 all_actions_np, all_next_states, all_rewards / REW_SCALE, 
+                                                                                 all_states, all_dones, entropy_factor, GAMMA, LAMBDA)
 
         # Normalized entropy, it ranges from 1 (fully random policy) to 0 (One action is deterministically taken)
         norm_entropy = real_entropy / - np.log(act_len)
@@ -145,4 +145,5 @@ def train_pensieve(gamma, ent_max, ent_decay, name):
 
 
 if __name__ == '__main__':
-    train_pensieve(gamma=0.9, ent_max=1, ent_decay=1/400, name='synthetic_test')
+    train_pensieve(gamma=0.96, ent_max=0.1, ent_decay=0.1/5000, name='synthetic_8000_epochs_manual_normer_obs_scaled')
+    # train_pensieve(gamma=0.9, ent_max=1, ent_decay=1/400, name='synthetic_test')

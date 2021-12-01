@@ -7,9 +7,9 @@ import numpy as np
 from abc import ABC, abstractmethod
 from cpolicies.mpc import take_action_py
 
-from pensieve.normer import Normer
-from pensieve.core_pg import sample_action
-from pensieve.nn import PensNet
+from normer import Normer
+from core_pg import sample_action
+from nn import PensNet
 from env import ABRSimEnv
 
 import torch

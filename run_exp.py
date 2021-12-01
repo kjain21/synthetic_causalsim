@@ -6,6 +6,7 @@ from policies import BBAAgent, RNDAgent, BBAAgentMIX, CMPCAgent, RateAgent, Bola
     PessimisticRateAgent, PensieveAgent
 from env import ABRSimEnv
 from traj_builder import run_trajectories
+from env.model import *
 
 
 def main():
@@ -14,7 +15,7 @@ def main():
 
     # Set up ABR environment
     print('Setting up environment..')
-    env = ABRSimEnv(15)
+    env = ABRSimEnv()
 
     # Pensieve 
     print("Starting Pensieve")
@@ -44,20 +45,20 @@ def main():
     print('Starting Pessimistic Rate based..')
     run_trajectories(env, PessimisticRateAgent(env=env), config.output_folder + '/pess_rate_traj.npy')
 
-    # By default, random policies are turned off because they are not practical for logging
-    if config.add_rnd_policy:
-        # BBA-RANDOM policies
-        for multiplier, portion_rnd in itertools.product([1, 2], [0.5]):
-            print('Starting BBAMIX..')
-            run_trajectories(env, BBAAgentMIX(env=env, mult=multiplier, ratio=portion_rnd),
-                             config.output_folder + '/bbamix_X%.1f_RND%d%%_traj.npy' % (multiplier,
-                                                                                        int(portion_rnd*100)))
-        # RANDOM policy
-        for i in range(3):
-            print('Starting Random..')
-            run_trajectories(env, RNDAgent(env=env, seed_add=i), config.output_folder + '/rnd_traj_%d.npy' % i)
+    # # By default, random policies are turned off because they are not practical for logging
+    # if config.add_rnd_policy:
+    #     # BBA-RANDOM policies
+    #     for multiplier, portion_rnd in itertools.product([1, 2], [0.5]):
+    #         print('Starting BBAMIX..')
+    #         run_trajectories(env, BBAAgentMIX(env=env, mult=multiplier, ratio=portion_rnd),
+    #                          config.output_folder + '/bbamix_X%.1f_RND%d%%_traj.npy' % (multiplier,
+    #                                                                                     int(portion_rnd*100)))
+    #     # RANDOM policy
+    #     for i in range(3):
+    #         print('Starting Random..')
+    #         run_trajectories(env, RNDAgent(env=env, seed_add=i), config.output_folder + '/rnd_traj_%d.npy' % i)
 
-    print('DONE')
+    # print('DONE')
 
 
 if __name__ == '__main__':
