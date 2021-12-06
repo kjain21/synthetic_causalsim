@@ -31,7 +31,7 @@ def train_pensieve(gamma, ent_max, ent_decay, name):
     # DO NOT CHANGE
     LR = 1e-3                       #  Learning rate
     WD = 1e-4                       #  Weight decay (or in other words, L2 regularization penalty)
-    NUM_EPOCHS = 500                #  How many epochs to train
+    NUM_EPOCHS = 5000                #  How many epochs to train
     EPOCH_SAVE = 100                #  How many epochs till we save the model
     ENT_MAX = ent_max               #  Initial value for entropy
     ENT_DECAY = ent_decay           #  Entropy decay rate
@@ -162,6 +162,6 @@ def train_pensieve(gamma, ent_max, ent_decay, name):
 
 
 if __name__ == '__main__':
-    train_pensieve(gamma=0.96, ent_max=0.1, ent_decay=0.1/5000, name='synthetic_correct_epochs_500')
+    train_pensieve(gamma=0.96, ent_max=0.1, ent_decay=0.1/5000, name='synthetic_correct_epochs_5000')
     # ideal gamma 0.96
     # train_pensieve(gamma=0.9, ent_max=1, ent_decay=1/400, name='synthetic_test')
