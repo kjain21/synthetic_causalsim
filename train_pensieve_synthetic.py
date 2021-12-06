@@ -1,3 +1,4 @@
+from logging import NullHandler
 from core_pg import sample_action, train_actor_critic
 from core_log import log_a2c
 from env.abr import ABRSimEnv
@@ -30,14 +31,19 @@ def train_pensieve(gamma, ent_max, ent_decay, name):
     # DO NOT CHANGE
     LR = 1e-3                       #  Learning rate
     WD = 1e-4                       #  Weight decay (or in other words, L2 regularization penalty)
-    NUM_EPOCHS = 8000                #  How many epochs to train
+    NUM_EPOCHS = 500                #  How many epochs to train
     EPOCH_SAVE = 100                #  How many epochs till we save the model
     ENT_MAX = ent_max               #  Initial value for entropy
     ENT_DECAY = ent_decay           #  Entropy decay rate
     REW_SCALE = 25                  #  Reward scale
     LAMBDA = 0.95                   #  Lambda, used for GAE-style advantage calculation
+    # lambda ideal: 0.95
     GAMMA = gamma                   #  Gamma in discounted rewards
     
+    avg_total_time = 0
+    avg_step_time = 0
+    avg_train_time = 0
+
     # We will save episodic returns for comparison later
     returns = np.zeros(NUM_EPOCHS)
 
@@ -47,8 +53,6 @@ def train_pensieve(gamma, ent_max, ent_decay, name):
     
     # The ABR environment, the argument is the random seed
     env = ABRSimEnv()
-
-    print("gets here")
 
     obs, _ = env.reset()
     
@@ -92,8 +96,11 @@ def train_pensieve(gamma, ent_max, ent_decay, name):
             # We sample an action
             act = sample_action(policy_net, normer(obs), torch.device('cpu'))
 
+            pre_step = time.time()
             # We take a step
             next_obs, rew, done, info = env.step(act)
+            post_step = time.time()
+            avg_step_time += post_step-pre_step
             # print(rew)
 
             # Save our interactions in the buffer
@@ -108,10 +115,13 @@ def train_pensieve(gamma, ent_max, ent_decay, name):
         all_states, all_next_states, all_actions_np, all_rewards, all_dones = buff.get()
         # print(all_rewards)
 
+        pre_train = time.time()
         # Train A2C with GAE and entropy regularizer, the names sound scary but they are simpler than you think
         pg_loss, v_loss, real_entropy, ret_np, v_np, adv_np = train_actor_critic(value_net, policy_net, net_opt_p, net_opt_v, net_loss, torch.device('cpu'), 
                                                                                  all_actions_np, all_next_states, all_rewards / REW_SCALE, 
                                                                                  all_states, all_dones, entropy_factor, GAMMA, LAMBDA)
+        post_train = time.time()
+        avg_train_time += post_train-pre_train
 
         # Normalized entropy, it ranges from 1 (fully random policy) to 0 (One action is deterministically taken)
         norm_entropy = real_entropy / - np.log(act_len)
@@ -127,6 +137,7 @@ def train_pensieve(gamma, ent_max, ent_decay, name):
         # Update elapsed time
         curr_time = time.time()
         elapsed = curr_time - last_time
+        avg_total_time += elapsed
         last_time = curr_time
 
         # Log the training via tensorboard
@@ -140,10 +151,17 @@ def train_pensieve(gamma, ent_max, ent_decay, name):
     state_dict_policy = policy_net.state_dict()
     torch.save(state_dicts, f'models/{name}/model_{epoch}')
     # torch.save(policy_net.state_dict(), f'models/only_policy/model_{epoch}')
-    print(returns)
+    avg_step_time = avg_step_time/NUM_EPOCHS
+    avg_train_time = avg_train_time/NUM_EPOCHS
+    avg_total_time = avg_total_time/NUM_EPOCHS
+    # print(returns)
+    print("AVG STEP: ", avg_step_time)
+    print("AVG TRAIN:", avg_train_time)
+    print("AVG TOTAL:", avg_total_time)
     return returns
 
 
 if __name__ == '__main__':
-    train_pensieve(gamma=0.96, ent_max=0.1, ent_decay=0.1/5000, name='synthetic_8000_epochs_manual_normer_obs_scaled')
+    train_pensieve(gamma=0.96, ent_max=0.1, ent_decay=0.1/5000, name='synthetic_correct_epochs_500')
+    # ideal gamma 0.96
     # train_pensieve(gamma=0.9, ent_max=1, ent_decay=1/400, name='synthetic_test')
